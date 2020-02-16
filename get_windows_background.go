@@ -14,6 +14,13 @@ func main() {
 	userProfile := os.Getenv("UserProfile")
 	myfolder := localappdata + `\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets`
 	files, _ := ioutil.ReadDir(myfolder)
+
+	//自定义的主题图片目录
+	customThemeFolder := userProfile + `\Pictures\customdesktopbackground\`
+	if !createFolderIfNotExist(customThemeFolder) {
+		fmt.Println("创建目录错误")
+		return
+	}
 	for _, file := range files {
 		srcName := myfolder + "/" + file.Name()
 		//验证图片是否可以为背景
@@ -22,8 +29,20 @@ func main() {
 			fmt.Printf("该文件不合法,不作为桌面主题%s \n ", srcName)
 			continue
 		}
-		copyFile(userProfile+`\Pictures\customdesktopbackground\`+file.Name()+`.jpg`, srcName)
+		copyFile(customThemeFolder+file.Name()+`.jpg`, srcName)
 	}
+}
+
+func createFolderIfNotExist(folderPath string) bool {
+	var _, err = os.Stat(folderPath)
+	if os.IsNotExist(err) {
+		var err = os.Mkdir(folderPath, os.ModePerm)
+		if err != nil {
+			fmt.Println(err.Error())
+			return false
+		}
+	}
+	return true
 }
 
 //copy文件
