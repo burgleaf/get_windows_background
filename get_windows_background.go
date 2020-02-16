@@ -10,8 +10,7 @@ import (
 )
 
 func main() {
-	var localappdata string
-	localappdata = os.Getenv("localappdata")
+	localappdata := os.Getenv("localappdata")
 	userProfile := os.Getenv("UserProfile")
 	myfolder := localappdata + `\Packages\Microsoft.Windows.ContentDeliveryManager_cw5n1h2txyewy\LocalState\Assets`
 	files, _ := ioutil.ReadDir(myfolder)
