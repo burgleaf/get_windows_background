@@ -7,6 +7,10 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"strconv"
+	"syscall"
+
+	"github.com/lxn/win"
 )
 
 func main() {
@@ -21,16 +25,24 @@ func main() {
 		fmt.Println("创建目录错误")
 		return
 	}
+
+	var count = 0
 	for _, file := range files {
 		srcName := myfolder + "/" + file.Name()
 		//验证图片是否可以为背景
 		imgConf := getImageWidthAndHeight(srcName)
 		if imgConf == nil || imgConf.width != 1920 {
-			fmt.Printf("该文件不合法,不作为桌面主题%s \n ", srcName)
+			fmt.Printf("忽略宽度不合适的图片:%s \n ", srcName)
 			continue
 		}
 		copyFile(customThemeFolder+file.Name()+`.jpg`, srcName)
+		count++
 	}
+
+	title := "复制锁屏图片成功"
+	content := "复制" + strconv.Itoa(count) + "张图片到[" + customThemeFolder + "]目录"
+	popWindows(title, content)
+
 }
 
 func createFolderIfNotExist(folderPath string) bool {
@@ -57,7 +69,7 @@ func copyFile(dstName string, srcName string) {
 		return
 	}
 	defer dst.Close()
-	fmt.Printf("copy文件:%s到%s \n", srcName, dstName)
+	fmt.Printf("复制文件:%s到%s \n", srcName, dstName)
 	io.Copy(dst, src)
 }
 
@@ -76,6 +88,15 @@ func getImageWidthAndHeight(imgPath string) *imgConf {
 	height := b.Max.Y
 	defer imgFile.Close()
 	return &imgConf{width, height}
+}
+
+func popWindows(title string, content string) {
+	var hwnd win.HWND
+	win.MessageBox(hwnd, _winText(content), _winText(title), win.MB_OK)
+}
+
+func _winText(_str string) *uint16 {
+	return syscall.StringToUTF16Ptr(_str)
 }
 
 type imgConf struct {
